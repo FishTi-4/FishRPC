@@ -2,7 +2,7 @@
 
 #include "event_loop.hpp"
 
-namespace FishRpc { 
+namespace FishRPC { 
 
   class RpcServer{
   public:

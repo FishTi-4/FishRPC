@@ -4,7 +4,7 @@
 #include <liburing.h>
 #include <unordered_map>
 
-namespace FishRpc{
+namespace FishRPC{
 
 
   class event_loop{

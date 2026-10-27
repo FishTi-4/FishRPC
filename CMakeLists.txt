@@ -14,9 +14,18 @@ file(GLOB SOURCES src/*.cpp)
 add_executable(coroutine_test test/test_coroutine.cpp)
 target_include_directories(coroutine_test PRIVATE ./include)
 
+add_executable(event_loop_test test/test_event_loop.cpp)
+target_include_directories(event_loop_test PRIVATE ./include)
+target_link_libraries(event_loop_test uring)
 
 
 
+
+
+
+
+
+#==============================================================
 # ---------------- protobuf ----------------
 find_package(Protobuf REQUIRED)
 

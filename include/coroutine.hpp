@@ -5,7 +5,7 @@
 #include <iostream>
 #include <utility>
 
-namespace FishRpc{
+namespace FishRPC{
 
   struct taskBase{
 
