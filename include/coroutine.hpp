@@ -4,17 +4,19 @@
 #include <exception>
 #include <iostream>
 
-namespace FishRPC{
+namespace FishRpc{
 
   struct taskBase{
 
   public:
-    taskBase() = default;
+  taskBase() = default;
+  ~taskBase() = default;
+    
     taskBase(const taskBase&) = delete;
-    taskBase(taskBase&&) = delete;
     taskBase& operator=(const taskBase&) = delete;
-    taskBase& operator=(taskBase&&) = delete;
-    ~taskBase() = default;
+    
+    taskBase(taskBase&&) = default ;
+    taskBase& operator=(taskBase&&) = default;
 
     // std::coroutine_handle<> handle;
   };
@@ -72,14 +74,17 @@ namespace FishRPC{
       if(handle)
         handle.destroy();
     }
+
+    bool is_done(){
+      return !handle || handle.done();
+    }
+
   };
 
 
   template<>
   struct task<void> : public taskBase{ 
       
-    
-
     struct promise_type{ 
 
       task get_return_object() noexcept{
@@ -121,6 +126,11 @@ namespace FishRPC{
       if(handle)
         handle.destroy();
     }
+
+    bool is_done(){
+      return !handle || handle.done();
+    }
+
   };
 
 
