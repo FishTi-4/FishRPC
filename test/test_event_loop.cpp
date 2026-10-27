@@ -37,11 +37,11 @@ FishRPC::task<void> many_co_await(int* n) {
   co_return;
 }
 
-// 1. 基本：run_once 把协程驱动到完成
+// 1. 基本：run 把协程驱动到完成
 void test_basic() {
   FishRPC::event_loop loop;
   counter = 0;
-  loop.run_once(do_work());
+  loop.run(do_work());
   assert(counter == 1);
 }
 
@@ -50,7 +50,7 @@ void test_loop_reuse() {
   FishRPC::event_loop loop;
   counter = 0;
   for (int i = 0; i < 1000; ++i) {
-    loop.run_once(do_work());
+    loop.run(do_work());
   }
   assert(counter == 1000);
 }
@@ -59,7 +59,7 @@ void test_loop_reuse() {
 void test_parameter_task() {
   FishRPC::event_loop loop;
   int sum = 0;
-  loop.run_once(accumulate(100, &sum));
+  loop.run(accumulate(100, &sum));
   assert(sum == 5050);
 }
 
@@ -67,7 +67,7 @@ void test_parameter_task() {
 void test_co_await() {
   FishRPC::event_loop loop;
   int n = 0;
-  loop.run_once(with_co_await(&n));
+  loop.run(with_co_await(&n));
   assert(n == 2);
 }
 
@@ -75,7 +75,7 @@ void test_co_await() {
 void test_many_co_await() {
   FishRPC::event_loop loop;
   int n = 0;
-  loop.run_once(many_co_await(&n));
+  loop.run(many_co_await(&n));
   assert(n == 10);
 }
 
@@ -87,14 +87,14 @@ void test_multiple_loops() {
   counter = 0;
   int n = 0;
 
-  loop1.run_once(do_work());
-  loop2.run_once(with_co_await(&n));
+  loop1.run(do_work());
+  loop2.run(with_co_await(&n));
 
   assert(counter == 1);
   assert(n == 2);
 }
 
-// 7. 创建任务时协程体不执行，run_once 后才完成
+// 7. 创建任务时协程体不执行，run 后才完成
 void test_lazy_start_and_done() {
   FishRPC::event_loop loop;
 
@@ -103,7 +103,7 @@ void test_lazy_start_and_done() {
   assert(counter == 0);   // initial_suspend 挂起，body 未执行
   assert(!t.is_done());
 
-  loop.run_once(std::move(t));
+  loop.run(std::move(t));
   assert(counter == 1);
   assert(t.is_done());    // final_suspend 处挂起，视为完成
 }

@@ -29,7 +29,7 @@ namespace FishRPC{
       io_uring_queue_exit(&ring_);
     }
 
-    void run_once(task<void>&& main_task)
+    void run(task<void>&& main_task)
     {
 
       main_task.resume();
