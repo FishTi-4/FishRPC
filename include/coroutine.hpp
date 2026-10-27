@@ -3,6 +3,7 @@
 #include <coroutine>
 #include <exception>
 #include <iostream>
+#include <utility>
 
 namespace FishRpc{
 
@@ -54,6 +55,24 @@ namespace FishRpc{
     std::coroutine_handle<promise_type> handle;
 
     explicit task(std::coroutine_handle<promise_type> handle): handle(handle){
+    }
+
+    task() : handle(nullptr) {
+    }
+
+    task(task&& other) noexcept
+      : taskBase(std::move(other)), handle(std::exchange(other.handle, nullptr)) {
+    }
+
+    task& operator=(task&& other) noexcept {
+      if (this != &other) {
+        if (handle) {
+          handle.destroy();
+        }
+        taskBase::operator=(std::move(other));
+        handle = std::exchange(other.handle, nullptr);
+      }
+      return *this;
     }
 
     ~task(){
@@ -111,6 +130,24 @@ namespace FishRpc{
 
     std::coroutine_handle<promise_type> handle;
     explicit task(std::coroutine_handle<promise_type> handle): handle(handle){
+    }
+
+    task() : handle(nullptr) {
+    }
+
+    task(task&& other) noexcept
+      : taskBase(std::move(other)), handle(std::exchange(other.handle, nullptr)) {
+    }
+
+    task& operator=(task&& other) noexcept {
+      if (this != &other) {
+        if (handle) {
+          handle.destroy();
+        }
+        taskBase::operator=(std::move(other));
+        handle = std::exchange(other.handle, nullptr);
+      }
+      return *this;
     }
 
     ~task(){
