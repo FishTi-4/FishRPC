@@ -3,18 +3,21 @@
 #include <coroutine>
 #include <exception>
 #include <iostream>
+#include <utility>
 
 namespace FishRPC{
 
   struct taskBase{
 
   public:
-    taskBase() = default;
+  taskBase() = default;
+  ~taskBase() = default;
+    
     taskBase(const taskBase&) = delete;
-    taskBase(taskBase&&) = delete;
     taskBase& operator=(const taskBase&) = delete;
-    taskBase& operator=(taskBase&&) = delete;
-    ~taskBase() = default;
+    
+    taskBase(taskBase&&) = default ;
+    taskBase& operator=(taskBase&&) = default;
 
     // std::coroutine_handle<> handle;
   };
@@ -54,6 +57,24 @@ namespace FishRPC{
     explicit task(std::coroutine_handle<promise_type> handle): handle(handle){
     }
 
+    task() : handle(nullptr) {
+    }
+
+    task(task&& other) noexcept
+      : taskBase(std::move(other)), handle(std::exchange(other.handle, nullptr)) {
+    }
+
+    task& operator=(task&& other) noexcept {
+      if (this != &other) {
+        if (handle) {
+          handle.destroy();
+        }
+        taskBase::operator=(std::move(other));
+        handle = std::exchange(other.handle, nullptr);
+      }
+      return *this;
+    }
+
     ~task(){
       if(handle){
         handle.destroy();
@@ -72,14 +93,17 @@ namespace FishRPC{
       if(handle)
         handle.destroy();
     }
+
+    bool is_done(){
+      return !handle || handle.done();
+    }
+
   };
 
 
   template<>
   struct task<void> : public taskBase{ 
       
-    
-
     struct promise_type{ 
 
       task get_return_object() noexcept{
@@ -108,6 +132,24 @@ namespace FishRPC{
     explicit task(std::coroutine_handle<promise_type> handle): handle(handle){
     }
 
+    task() : handle(nullptr) {
+    }
+
+    task(task&& other) noexcept
+      : taskBase(std::move(other)), handle(std::exchange(other.handle, nullptr)) {
+    }
+
+    task& operator=(task&& other) noexcept {
+      if (this != &other) {
+        if (handle) {
+          handle.destroy();
+        }
+        taskBase::operator=(std::move(other));
+        handle = std::exchange(other.handle, nullptr);
+      }
+      return *this;
+    }
+
     ~task(){
       if(handle){
         handle.destroy();
@@ -121,6 +163,11 @@ namespace FishRPC{
       if(handle)
         handle.destroy();
     }
+
+    bool is_done(){
+      return !handle || handle.done();
+    }
+
   };
 
 

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package package_name;
+
+message RpcRequest{
+  int32 id = 1;
+  string method = 2;
+  bytes params = 3;
+}
+
+message RpcResponse{
+  int32 id = 1;
+  int32 error = 2;
+  bytes error_message = 3;
+  bytes result = 4;
+}
+
+message RpcPackage{
+
+  oneof package_type {
+    RpcRequest request = 1;
+    RpcResponse response = 2;
+  }
+
+}
