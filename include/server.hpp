@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <vector>
 #include <thread>
+#include "awaitable.hpp"
 
 namespace FishRPC { 
 
@@ -20,54 +21,34 @@ namespace FishRPC {
       event_loop loop;
 
 
-      loop.run(task_listence (listen_fd));
+      loop.run(task_listence(loop, listen_fd));
       close(listen_fd);
     }
 
-    task<void> task_listence(int fd){
 
+    task<void> task_listence(event_loop& loop, int fd){
+      io_uring ring;
       
-      while(1){
+      sockaddr_in addr;
+      socklen_t addr_len;
 
-        co_await task_accept(fd);  
+      while(1){
+        int fd = co_await task_accept(&ring, fd, &addr, &addr_len);
+        loop.add_task();
 
       }
 
     }
 
-    class task_accept{
-    public:
-    
-      task_accept()
-      {
-        io_uring_queue_init(1024, &ring, 0);
-      }
-
-      io_uring get_ring()
-      {
-        return ring;
-      }
-
-      bool await_ready()
-      {
-        return false;
-      }
-
-      void await_suspend(std::coroutine_handle<> handle)
-      {
-        io_uring_sqe* sqe = io_uring_get_sqe(&ring);
-        io_uring_prep_accept(sqe, fd, nullptr, nullptr, 0);
-        io_uring_sqe_set_data(sqe, handle.address());
-        io_uring_submit(&ring);
-      }
-
+    task<void> handle_connection(int fd)
+    {
+      
       
 
 
+    }
+
     
-    private:
-      io_uring ring;
-    };
 
 
 

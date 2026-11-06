@@ -3,6 +3,7 @@
 #include "coroutine.hpp"
 #include <liburing.h>
 #include <unordered_map>
+#include <awaitable.hpp>
 
 namespace FishRPC{
 
@@ -47,18 +48,38 @@ namespace FishRPC{
         handle_task();
         reap_task();
       }
-      
     }
-    
+
+    void add_task(task<void> task){
+      tasks_ [task.handle.address()] = std::move(task);
+      task.resume();
+    }
 
   private:
     io_uring ring_{};
 
     void handle_task(){
-      for(auto& cur : tasks_){
-        cur.second.resume();
+
+
+      // for(auto& cur : tasks_){
+      //   cur.second.resume();
+      // }
+      
+      io_uring_cqe* cqe;
+      int cnt = 0;
+      io_uring_submit_and_wait(&ring_, 1);
+      io_uring_for_each_cqe(&ring_, cnt, cqe){
+        auto task = reinterpret_cast<awaitable_base*>(cqe->user_data);
+        task->result = cqe->res;
+
+        if(task->type == awaitable_base::Type::resume ){
+          task->handle.resume();
+        }
       }
+
+      io_uring_cq_advance (&ring_, cnt);
     }
+
 
     void reap_task()
     {
@@ -73,12 +94,6 @@ namespace FishRPC{
 
       }
 
-    }
-
-
-    void add_task(task<void> task){
-      tasks_ [task.handle.address()] = std::move(task);
-      task.resume();
     }
 
 
