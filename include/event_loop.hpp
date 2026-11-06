@@ -78,6 +78,7 @@ namespace FishRPC{
 
     void add_task(task<void> task){
       tasks_ [task.handle.address()] = std::move(task);
+      task.resume();
     }
 
 
