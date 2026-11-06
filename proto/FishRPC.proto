@@ -2,24 +2,24 @@ syntax = "proto3";
 
 package package_name;
 
-message RpcRequest{
+message Req{
   int32 id = 1;
   string method = 2;
   bytes params = 3;
 }
 
-message RpcResponse{
+message Resp{
   int32 id = 1;
   int32 error = 2;
   bytes error_message = 3;
   bytes result = 4;
 }
 
-message RpcPackage{
+message Frame{
 
   oneof package_type {
-    RpcRequest request = 1;
-    RpcResponse response = 2;
+    Req request = 1;
+    Resp response = 2;
   }
 
 }

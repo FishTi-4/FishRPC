@@ -20,7 +20,7 @@ namespace FishRPC{
   
   std::coroutine_handle<> handle;
   int result;
-  Type type;
+  Type type = Type::resume;
 };
 
 
@@ -42,6 +42,7 @@ struct task_accept : public awaitable_base {
   }
   
   void await_suspend(std::coroutine_handle<> handle){
+    this->handle = handle;
     io_uring_sqe* sqe = io_uring_get_sqe(ring);
     io_uring_prep_accept(sqe, listen_fd, reinterpret_cast<sockaddr*>(addr), addr_len, 0);
     io_uring_sqe_set_data(sqe, this);
@@ -53,6 +54,35 @@ struct task_accept : public awaitable_base {
   
 };
 
+
+struct task_write : public awaitable_base { 
+
+  io_uring* ring;
+  char* buf;
+  int size;
+  int fd;
+
+  task_write(io_uring* ring, char* buf, int size, int fd)
+  : ring(ring), buf(buf), size(size), fd(fd)
+  {
+  }
+
+  bool await_ready(){
+    return false;
+  }
+
+  void await_suspend(std::coroutine_handle<> handle){
+    this->handle = handle;
+    io_uring_sqe* sqe = io_uring_get_sqe(ring);
+    io_uring_prep_write(sqe, fd, buf, size, 0);
+    io_uring_sqe_set_data(sqe, this);
+  }
+
+  int await_resume(){
+    return result;
+  }
+
+};
 
 
 } //namespace FishRPC
