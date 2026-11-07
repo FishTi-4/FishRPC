@@ -12,6 +12,7 @@ namespace FishRPC{
 
 #define PROTOCOL_BUF_SIZE 4096
 
+
   task<bool> read_exatc(io_uring& ring, int size, std::string &buffer, int fd){
     
     int got = 0;
@@ -38,16 +39,24 @@ namespace FishRPC{
     co_return true;
   }
 
-  // task<bool> read_frame(io_uring& ring, int size, std::string &buffer, int fd){
-
-    
-
-  // }
-
-
   using Frame = package_name::Frame;
 
-  task<bool> write_frame(io_uring* ring, int fd, Frame content){
+  task<bool> read_frame(io_uring& ring, int fd, Frame& content){
+
+    std::string s;
+    read_exatc(ring, 4, s,  fd);
+    
+    int len;
+    memcpy(&len, s.data(), 4);
+    len = ntohl(len);
+
+    s = "";
+    read_exatc(ring, len, s, fd);
+
+    co_return content.ParseFromString(s);
+  }
+
+  task<bool> write_frame(io_uring* ring, int fd, Frame& content){
 
     std::string load;
     content.SerializeToString(&load);

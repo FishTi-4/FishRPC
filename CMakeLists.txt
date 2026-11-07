@@ -50,12 +50,17 @@ add_executable(write_frame_test test/test_write_frame.cpp)
 target_include_directories(write_frame_test PRIVATE ./include)
 target_link_libraries(write_frame_test uring fishrpc_proto)
 
+add_executable(read_frame_test test/test_write_frame.cpp)
+target_include_directories(read_frame_test PRIVATE ./include)
+target_link_libraries(read_frame_test uring fishrpc_proto)
+
 
 set(test_name 
   coroutine_test
   event_loop_test
   protocol_test
   write_frame_test
+  read_frame_test
 )
 
 foreach(t IN LISTS test_name )
