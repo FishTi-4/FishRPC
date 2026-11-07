@@ -43,3 +43,7 @@ target_include_directories(fishrpc_proto PUBLIC
     ${Protobuf_INCLUDE_DIRS}
 )
 target_link_libraries(fishrpc_proto PUBLIC protobuf::libprotobuf)
+
+add_executable(write_frame_test test/test_write_frame.cpp)
+target_include_directories(write_frame_test PRIVATE ./include)
+target_link_libraries(write_frame_test uring fishrpc_proto)

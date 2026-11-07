@@ -15,7 +15,7 @@ message Resp{
   bytes result = 4;
 }
 
-message RpcPackage{
+message Frame{
 
   oneof package_type {
     Req request = 1;

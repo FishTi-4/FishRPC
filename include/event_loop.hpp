@@ -67,14 +67,17 @@ namespace FishRPC{
       
       io_uring_cqe* cqe;
       int cnt = 0;
+      int head = 0;
       io_uring_submit_and_wait(&ring_, 1);
-      io_uring_for_each_cqe(&ring_, cnt, cqe){
+      io_uring_for_each_cqe(&ring_, head, cqe ){
         auto task = reinterpret_cast<awaitable_base*>(cqe->user_data);
         task->result = cqe->res;
 
         if(task->type == awaitable_base::Type::resume ){
           task->handle.resume();
         }
+
+        ++ cnt;
       }
 
       io_uring_cq_advance (&ring_, cnt);
