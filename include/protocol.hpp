@@ -19,8 +19,11 @@ namespace FishRPC{
 
     while(1){
       int res = co_await task_read(&ring, fd, buf, std::min(PROTOCOL_BUF_SIZE, size - got ) ) ;
-      if(res <= 0){
+      if(res < 0){
         throw std::runtime_error("read error");
+      }
+      else if(res == 0){
+        co_return false;
       }
       
 
@@ -35,11 +38,11 @@ namespace FishRPC{
     co_return true;
   }
 
-  task<bool> read_frame(io_uring& ring, int size, std::string &buffer, int fd){
+  // task<bool> read_frame(io_uring& ring, int size, std::string &buffer, int fd){
 
     
 
-  }
+  // }
 
 
   using Frame = package_name::Frame;
@@ -61,12 +64,12 @@ namespace FishRPC{
     while(1){
 
       int res = co_await task_write(ring, load.data() + send_size, load.size() - send_size, fd);
-      if(res <= 0){
+      if(res < 0){
         co_return false;
       }
-      // else if(res == 0){
-      //   break;
-      // }
+      else if(res == 0){
+        co_return false;
+      }
       
       send_size += res;
       if(send_size == load.size()){

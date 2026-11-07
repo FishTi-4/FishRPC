@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(FishRPC CXX)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -20,7 +22,7 @@ target_link_libraries(event_loop_test uring)
 
 add_executable(protocol_test test/test_protocol.cpp)
 target_include_directories(protocol_test PRIVATE ./include)
-target_link_libraries(protocol_test uring)
+target_link_libraries(protocol_test uring fishrpc_proto)
 
 
 
@@ -47,3 +49,16 @@ target_link_libraries(fishrpc_proto PUBLIC protobuf::libprotobuf)
 add_executable(write_frame_test test/test_write_frame.cpp)
 target_include_directories(write_frame_test PRIVATE ./include)
 target_link_libraries(write_frame_test uring fishrpc_proto)
+
+
+set(test_name 
+  coroutine_test
+  event_loop_test
+  protocol_test
+  write_frame_test
+)
+
+foreach(t IN LISTS test_name )
+  add_test(NAME ${t} COMMAND ${t})
+  set_tests_properties(${t} PROPERTIES TIMEOUT 30)
+endforeach()
