@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -38,6 +39,7 @@ int pump(io_uring* ring, task<T> t, T* out) {
       ++cqe_count;
       auto* base = reinterpret_cast<awaitable_base*>(cqe->user_data);
       base->result = cqe->res;
+      assert(base->handle && "awaitable did not save coroutine handle");
       base->handle.resume();
     }
     io_uring_cq_advance(ring, cnt);

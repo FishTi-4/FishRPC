@@ -38,6 +38,7 @@ int pump(io_uring* ring, task<T> t, T* out) {
       ++cqe_count;
       auto* base = reinterpret_cast<awaitable_base*>(cqe->user_data);
       base->result = cqe->res;
+      assert(base->handle && "awaitable did not save coroutine handle");
       base->handle.resume();
     }
     io_uring_cq_advance(ring, cnt);
@@ -348,7 +349,7 @@ void test_read_frame_roundtrip_with_write_frame() {
 
   Frame sent = make_resp_frame(5, 0, "ok");
   bool write_ok = false;
-  pump(&ring, FishRPC::write_frame(&ring, sv[0], sent), &write_ok);
+  pump(&ring, FishRPC::write_frame(ring, sv[0], sent), &write_ok);
   assert(write_ok);
 
   Frame got;

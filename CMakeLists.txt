@@ -50,7 +50,7 @@ add_executable(write_frame_test test/test_write_frame.cpp)
 target_include_directories(write_frame_test PRIVATE ./include)
 target_link_libraries(write_frame_test uring fishrpc_proto)
 
-add_executable(read_frame_test test/test_write_frame.cpp)
+add_executable(read_frame_test test/test_read_frame.cpp)
 target_include_directories(read_frame_test PRIVATE ./include)
 target_link_libraries(read_frame_test uring fishrpc_proto)
 

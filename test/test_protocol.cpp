@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <vector>
 
 #include <liburing.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -60,7 +62,7 @@ int send_all(int fd, const char* data, size_t len) {
   size_t off = 0;
   while (off < len) {
     ssize_t n = ::write(fd, data + off, len - off);
-    if (n < 0) {
+    if (n <= 0) {
       return -1;
     }
     off += static_cast<size_t>(n);
