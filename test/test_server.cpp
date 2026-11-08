@@ -158,7 +158,16 @@ int main() {
   auto* request = req.mutable_request();
   request->set_id(1);
   request->set_method("echo");
-  request->set_params("hello");
+
+  // params 按协议约定携带"序列化后的请求体"（与 proto/Task.proto 的 ADD_REQ 用法一致）：
+  // server 侧 register_method 会 req.ParseFromString(params) 还原出 REQ。
+  package_name::Req inner_req;
+  inner_req.set_id(1);
+  inner_req.set_method("echo");
+  inner_req.set_params("hello");
+  std::string payload;
+  assert(inner_req.SerializeToString(&payload));
+  request->set_params(payload);
 
   assert(write_all(fd, wire_frame(req)) && "send request failed");
 

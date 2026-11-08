@@ -51,8 +51,15 @@ namespace FishRPC{
     }
 
     void add_task(task<void> task){
-      tasks_ [task.handle.address()] = std::move(task);
+      
+      auto& h = task.handle;
+      
       task.resume();
+      if(h.done())  {
+        return;
+      }
+
+      tasks_ [task.handle.address()] = std::move(task);
     }
 
     io_uring& get_ring(){

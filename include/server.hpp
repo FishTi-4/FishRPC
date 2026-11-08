@@ -49,11 +49,11 @@ namespace FishRPC {
     task<void> task_listence(event_loop& loop, int fd, io_uring& ring){
       
       sockaddr_in addr;
-      socklen_t addr_len;
+      socklen_t addr_len = sizeof(addr);
 
       while(1){
-        int fd = co_await task_accept(&ring, fd, &addr, &addr_len);
-        loop.add_task( frame_worker(ring, fd) );
+        int accept_fd = co_await task_accept(&ring, fd, &addr, &addr_len);
+        loop.add_task( frame_worker(ring, accept_fd) );
       }
     }
 
@@ -63,11 +63,14 @@ namespace FishRPC {
       while(true){
 
         package_name::Frame Req;
-        read_frame(ring, fd, Req);
+        if( co_await read_frame(ring, fd, Req) == false ){
+          break;
+        }
         
         package_name::Frame Resp = Req_handle(Req);
-        write_frame(ring, fd, Resp);
-
+        if(co_await write_frame(ring, fd, Resp) == false){
+          break;
+        }
       }
 
       close(fd);

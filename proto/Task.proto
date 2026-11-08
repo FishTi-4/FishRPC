@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package Task_protocol;
+
+
+message ADD_REQ{
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message ADD_RESP{
+  int32 result = 1;
+}

@@ -26,16 +26,11 @@ target_link_libraries(protocol_test uring fishrpc_proto)
 
 
 
-
-
-
-
-
 #==============================================================
 # ---------------- protobuf ----------------
 find_package(Protobuf REQUIRED)
 
-file(GLOB PROTO_FILES proto/*.proto)
+file(GLOB PROTO_FILES CONFIGURE_DEPENDS proto/*.proto)
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
