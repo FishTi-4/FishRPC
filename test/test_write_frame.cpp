@@ -14,8 +14,9 @@
 namespace {
 
 using FishRPC::awaitable_base;
-using FishRPC::Frame;
 using FishRPC::task;
+
+using Frame = package_name::Frame;
 
 // 手动驱动协程直至完成（与 event_loop::handle_task 同样的逻辑）：
 // resume -> submit_and_wait -> 逐条处理 cqe（回填 result 并恢复协程）
@@ -105,7 +106,7 @@ void test_write_frame_basic() {
   frame.SerializeToString(&payload);
 
   bool ok = false;
-  int cqe_count = pump(&ring, FishRPC::write_frame(&ring, sv[0], frame), &ok);
+  int cqe_count = pump(&ring, FishRPC::write_frame(ring, sv[0], frame), &ok);
   assert(ok);
   assert(cqe_count == 1); // 载荷很小，一次写即可完成
 
@@ -136,7 +137,7 @@ void test_write_frame_empty() {
   Frame frame; // 未设置任何字段
 
   bool ok = false;
-  pump(&ring, FishRPC::write_frame(&ring, sv[0], frame), &ok);
+  pump(&ring, FishRPC::write_frame(ring, sv[0], frame), &ok);
   assert(ok);
 
   std::string wire = read_all(sv[1], 4);
@@ -161,7 +162,7 @@ void test_write_frame_response() {
   frame.SerializeToString(&payload);
 
   bool ok = false;
-  pump(&ring, FishRPC::write_frame(&ring, sv[0], frame), &ok);
+  pump(&ring, FishRPC::write_frame(ring, sv[0], frame), &ok);
   assert(ok);
 
   std::string wire = read_all(sv[1], 4 + payload.size());
@@ -211,7 +212,7 @@ void test_write_frame_partial() {
   });
 
   bool ok = false;
-  int cqe_count = pump(&ring, FishRPC::write_frame(&ring, sv[0], frame), &ok);
+  int cqe_count = pump(&ring, FishRPC::write_frame(ring, sv[0], frame), &ok);
   assert(ok);
   assert(cqe_count >= 2); // 确实发生过多次写
 
@@ -231,7 +232,7 @@ void test_write_frame_bad_fd() {
   Frame frame = make_req_frame(1, "m", "p");
 
   bool ok = true;
-  int cqe_count = pump(&ring, FishRPC::write_frame(&ring, -1, frame), &ok);
+  int cqe_count = pump(&ring, FishRPC::write_frame(ring, -1, frame), &ok);
   assert(!ok);
   assert(cqe_count == 1); // 第一次写就失败，不会继续循环
 
@@ -251,8 +252,8 @@ void test_write_multiple_frames() {
 
   bool ok1 = false;
   bool ok2 = false;
-  pump(&ring, FishRPC::write_frame(&ring, sv[0], a), &ok1);
-  pump(&ring, FishRPC::write_frame(&ring, sv[0], b), &ok2);
+  pump(&ring, FishRPC::write_frame(ring, sv[0], a), &ok1);
+  pump(&ring, FishRPC::write_frame(ring, sv[0], b), &ok2);
   assert(ok1);
   assert(ok2);
 

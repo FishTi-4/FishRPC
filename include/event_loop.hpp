@@ -55,6 +55,10 @@ namespace FishRPC{
       task.resume();
     }
 
+    io_uring& get_ring(){
+      return ring_;
+    }
+
   private:
     io_uring ring_{};
 

@@ -14,8 +14,9 @@
 namespace {
 
 using FishRPC::awaitable_base;
-using FishRPC::Frame;
 using FishRPC::task;
+
+using Frame = package_name::Frame;
 
 // 手动驱动协程直至完成（与 event_loop::handle_task 同样的逻辑）：
 // resume -> submit_and_wait -> 逐条处理 cqe（回填 result 并恢复协程）。

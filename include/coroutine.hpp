@@ -85,7 +85,10 @@ namespace FishRPC{
     };
 
     awaiter operator co_await(){
-      awaiter temp_awaiter{  std::exchange(this -> handle, nullptr)};
+      awaiter temp_awaiter{
+        std::coroutine_handle<promise_type>::from_address(
+          std::exchange(this->handle, nullptr).address())
+      };
 
       return temp_awaiter;
     }
