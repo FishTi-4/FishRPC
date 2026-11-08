@@ -67,3 +67,8 @@ foreach(t IN LISTS test_name )
   add_test(NAME ${t} COMMAND ${t})
   set_tests_properties(${t} PROPERTIES TIMEOUT 30)
 endforeach()
+
+
+add_executable(example_server ./examples/example_server.cpp)
+target_include_directories(example_server PRIVATE ./include)
+target_link_libraries(example_server uring fishrpc_proto)

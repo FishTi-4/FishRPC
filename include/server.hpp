@@ -32,6 +32,19 @@ namespace FishRPC {
       };
     }
 
+    void start(const char* port, int thread_num){
+      for(int i = 0; i < thread_num; i++){
+        threads.emplace_back([this, port](){
+          start_once(port);
+        });
+      }
+
+      for(auto& t : threads){
+        t.join();
+      }
+
+    }
+
     
   private:
   
