@@ -18,6 +18,8 @@ namespace FishRPC{
     int got = 0;
     char buf[PROTOCOL_BUF_SIZE];
 
+    if (size <= 0) co_return size == 0;
+
     while(1){
       int res = co_await task_read(&ring, fd, buf, std::min(PROTOCOL_BUF_SIZE, size - got ) ) ;
       if(res < 0){
@@ -44,7 +46,9 @@ namespace FishRPC{
   task<bool> read_frame(io_uring& ring, int fd, package_name::Frame& content){
 
     std::string s;
-    co_await read_exatc(ring, 4, s,  fd);
+    if(co_await read_exatc(ring, 4, s,  fd) == false){
+      co_return false;
+    }
     
     int len;
     memcpy(&len, s.data(), 4);

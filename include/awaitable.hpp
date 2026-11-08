@@ -72,6 +72,7 @@ struct task_read : public awaitable_base {
   }
 
   void await_suspend(std::coroutine_handle<> handle){
+    this->handle = handle;
     io_uring_sqe* sqe = io_uring_get_sqe(ring);
     io_uring_prep_recv(sqe, fd, buf, len ,0);
     io_uring_sqe_set_data(sqe, this);

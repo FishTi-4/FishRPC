@@ -47,9 +47,18 @@ namespace FishRPC{
         return {};
       }
 
-      std::suspend_always final_suspend() noexcept{
-        return {};
-      }
+      struct final_awaiter {
+        bool await_ready() noexcept { return false; }
+
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> self) noexcept {
+          auto parent = self.promise().fa;
+          return parent ? parent : std::noop_coroutine();
+        }
+
+        void await_resume() noexcept {}
+      };
+
+      final_awaiter final_suspend() noexcept { return {}; }
 
       void return_value(T value){
         this->value = value;
@@ -78,8 +87,10 @@ namespace FishRPC{
         return son_handle;
       }
 
-      void await_resume(){
+      T await_resume(){
+        auto v = son_handle.promise().value;
         son_handle.destroy();
+        return std::move(v);
       }
 
     };
@@ -238,9 +249,18 @@ namespace FishRPC{
         return {};
       }
 
-      std::suspend_always final_suspend() noexcept{
-        return {};
-      }
+      struct final_awaiter {
+        bool await_ready() noexcept { return false; }
+
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type> self) noexcept {
+          auto parent = self.promise().fa;
+          return parent ? parent : std::noop_coroutine();
+        }
+
+        void await_resume() noexcept {}
+      };
+
+      final_awaiter final_suspend() noexcept { return {}; }
 
       void unhandled_exception() noexcept{
         std::cout << "unhandled_exception" << std::endl;
