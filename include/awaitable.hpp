@@ -115,4 +115,34 @@ struct task_write : public awaitable_base {
 };
 
 
+  struct task_connect : public awaitable_base { 
+
+    io_uring* ring;
+    sockaddr* addr;
+    socklen_t addr_len;
+    int fd;
+
+    task_connect(io_uring* ring, sockaddr* addr, socklen_t addr_len, int fd)
+    : ring(ring), addr(addr), addr_len(addr_len), fd(fd)
+    {
+    }
+
+    bool await_ready(){
+      return false;
+    }
+
+    void await_suspend(std::coroutine_handle<> handle){
+      this->handle = handle;
+      io_uring_sqe* sqe = io_uring_get_sqe(ring);
+      io_uring_prep_connect(sqe, fd, addr, addr_len);
+      io_uring_sqe_set_data(sqe, this);
+    }
+
+    int await_resume(){
+      return result;
+    }
+
+  };
+
+
 } //namespace FishRPC
