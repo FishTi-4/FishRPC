@@ -81,18 +81,14 @@ FishRPC::task<void> client_flow(FishRPC::RpcClient& client, const std::string& p
   bool ok = co_await client.connect("127.0.0.1", port.c_str());
   assert(ok);
 
-  package_name::Frame frame;
-  // params 按协议约定携带"序列化后的请求体"（与 test_server.cpp 用法一致）：
+  // call<REQ, RESP> 会把请求体序列化进 params（与 test_server.cpp 用法一致）：
   // server 侧 register_method 会 req.ParseFromString(params) 还原出 REQ。
   package_name::Req inner_req;
   inner_req.set_id(0);
   inner_req.set_method("echo");
   inner_req.set_params("hello");
-  std::string payload;
-  assert(inner_req.SerializeToString(&payload));
-  frame.mutable_request()->set_params(payload);
 
-  out = co_await client.call("echo", frame);
+  out = co_await client.call<package_name::Req, package_name::Resp>("echo", inner_req);
   co_return;
 }
 

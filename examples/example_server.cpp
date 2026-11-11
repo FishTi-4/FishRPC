@@ -14,7 +14,7 @@ void reg(){
 
 int main(){
   reg();
-
+  std::cout << "服务器启动" << std::endl;
   server.start("8080", 1);
 
 }

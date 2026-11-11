@@ -77,3 +77,7 @@ endforeach()
 add_executable(example_server ./examples/example_server.cpp)
 target_include_directories(example_server PRIVATE ./include)
 target_link_libraries(example_server uring fishrpc_proto FishRPC)
+
+add_executable(example_client ./examples/example_client.cpp)
+target_include_directories(example_client PRIVATE ./include)
+target_link_libraries(example_client uring fishrpc_proto FishRPC)

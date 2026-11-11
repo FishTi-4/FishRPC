@@ -19,7 +19,45 @@ public:
 
   task<bool> connect(const char* ip, const char* port);
 
-  task<package_name::Resp> call(std::string method, package_name::Frame& REQ);
+  template<typename REQ, typename RESP>
+  task<RESP> call(std::string method, REQ& request){
+    if(server_fd <= 0)  throw std::runtime_error("not connected");
+
+    int cur_id = idx++;
+
+    package_name::Frame frame;
+    auto* req = frame.mutable_request();
+    req->set_id(cur_id);
+    req->set_method(method);
+
+    std::string params;
+    if(!request.SerializeToString(&params)){
+      throw std::runtime_error("serialize request error");
+    }
+    req->set_params(params);
+
+    awaitable_response awaiter;
+    pending_[cur_id] = &awaiter;
+
+    if(!co_await write_frame(loop.get_ring(), server_fd, frame)){
+      throw std::runtime_error("write request error");
+    }
+
+    co_await awaiter;
+
+    pending_.erase(cur_id);
+
+    if(awaiter.error != 0){
+      throw std::runtime_error(awaiter.error_message);
+    }
+
+    RESP resp;
+    if(!resp.ParseFromString(awaiter.result)){
+      throw std::runtime_error("parse response error");
+    }
+
+    co_return resp;
+  }
 
   void run(task<void>&& main_task);
 

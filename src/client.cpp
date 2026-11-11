@@ -21,35 +21,6 @@ task<bool> RpcClient::connect(const char* ip, const char* port){
   co_return true;
 }
 
-task<package_name::Resp> RpcClient::call(std::string method, package_name::Frame& REQ){
-  if(server_fd <= 0)  throw std::runtime_error("not connected");
-
-  package_name::Resp resp;
-  int cur_id = idx ++;
-  resp.set_id(cur_id);
-
-  auto req = REQ.mutable_request();
-  req->set_method(method);
-  req->set_id(cur_id);
-
-  awaitable_response awaiter;
-  pending_[resp.id()] = &awaiter;
-
-
-  if(!co_await write_frame(loop.get_ring(), server_fd, REQ)){
-    throw std::runtime_error("write request error");
-  }
-
-  co_await awaiter;
-
-  pending_.erase(cur_id);
-
-  if(!resp.ParseFromString(awaiter.result)){
-    throw std::runtime_error("parse response error");
-  }
-  else co_return resp;
-}
-
 void RpcClient::run(task<void>&& main_task){
   loop.run(std::move(main_task));
 }
